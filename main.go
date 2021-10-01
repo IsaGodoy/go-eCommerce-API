@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/IsaGodoy/go-eCommerce-API/handlers"
 	"github.com/IsaGodoy/go-eCommerce-API/server"
@@ -10,7 +12,8 @@ import (
 
 func main() {
 	godotenv.Load()
-	server := server.NewServer(":3000")
+	port := os.Getenv("PORT")
+	server := server.NewServer(fmt.Sprint(":", port))
 	server.AddRoute(http.MethodGet, "/", handlers.HandleHome)
 	server.AddRoute(http.MethodPut, "/product", handlers.ChangePrices)
 	server.Listen()

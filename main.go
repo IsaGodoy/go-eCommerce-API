@@ -13,6 +13,11 @@ import (
 func main() {
 	godotenv.Load()
 	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "3000"
+	}
+
 	server := server.NewServer(fmt.Sprint(":", port))
 	server.AddRoute(http.MethodGet, "/", handlers.HandleHome)
 	server.AddRoute(http.MethodPut, "/product", handlers.ChangePrices)

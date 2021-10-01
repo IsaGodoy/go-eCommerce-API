@@ -16,23 +16,31 @@ func HandleHome(writer http.ResponseWriter, request *http.Request) {
 
 func ChangePrices(writer http.ResponseWriter, request *http.Request) {
 	var input types.VariantPut
+	var message string
 	decoder := json.NewDecoder(request.Body)
 	err := decoder.Decode(&input)
+	writer.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
-		fmt.Fprintf(writer, "Error when decoding input: %v", err)
+		message = fmt.Sprintf(`{"message": "Error when decoding input: %v"}`, err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write([]byte(message))
 		return
 	}
 
 	variant, ok, err := methods.GetProduct(input.SKU)
 
 	if !ok {
-		fmt.Fprintf(writer, "Error when searching product: %v", err)
+		message = fmt.Sprintf(`{"message": "Error when searching product: %v"}`, err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write([]byte(message))
 		return
 	}
 
 	if variant.ID == 0 {
-		fmt.Fprintf(writer, "Error: Product does not exist")
+		message = `{"message": "Product does not exist"}`
+		writer.WriteHeader(http.StatusNotFound)
+		writer.Write([]byte(message))
 		return
 	}
 
@@ -47,9 +55,13 @@ func ChangePrices(writer http.ResponseWriter, request *http.Request) {
 	ok, err = methods.UpdatePrices(product)
 
 	if !ok {
-		fmt.Fprintf(writer, "Error when updating prices: %v", err)
+		message = fmt.Sprintf(`{"message": "Error when updating prices: %v"}`, err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write([]byte(message))
 		return
 	}
 
-	fmt.Fprintf(writer, "OK")
+	message = `{"message": "OK"}`
+	writer.WriteHeader(http.StatusOK)
+	writer.Write([]byte(message))
 }
